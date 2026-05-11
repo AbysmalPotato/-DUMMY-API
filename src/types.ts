@@ -38,3 +38,16 @@ export interface AttendanceRecord {
   late_minutes: number;
   undertime_minutes: number;
 }
+
+export interface OfficeOrder {
+  office_order_no: string;
+  employee_no: string;
+  purpose: string;
+  destination: string;
+  travel_type: "local" | "regional" | "national";
+  travel_date_start: string;
+  travel_date_end: string;
+  status: "approved";
+  approved_at: string;
+  remarks: string | null;
+}

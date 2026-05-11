@@ -1,9 +1,10 @@
-import { generateEmployees, generateAttendance, divisions } from "./data";
+import { generateEmployees, generateAttendance, divisions, generateOfficeOrders } from "./data";
 
 const PORT = process.env.PORT ? parseInt(process.env.PORT) : 3000;
 
 const profiles = generateEmployees();
 const attendance = generateAttendance();
+const officeOrders = generateOfficeOrders();
 
 function json(data: unknown, status = 200) {
   return new Response(JSON.stringify(data, null, 2), {
@@ -58,9 +59,13 @@ const server = Bun.serve({
       return json(divisions);
     }
 
+    if (path === "/office-orders") {
+      return json({ total: officeOrders.length, data: officeOrders });
+    }
+
     return json({ error: "Not found" }, 404);
   },
 });
 
 console.log(`✅ Employee API running on http://localhost:${PORT}`);
-console.log(`   /employees → 82 records | /attendance → ${attendance.length} records | /divisions → ${divisions.length} records`);
+console.log(`   /employees → ${profiles.length} records | /attendance → ${attendance.length} records | /divisions → ${divisions.length} records | /office-orders → ${officeOrders.length} records`);

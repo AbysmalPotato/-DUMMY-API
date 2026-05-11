@@ -1,4 +1,4 @@
-import type { EmployeeProfile, AttendanceRecord, Division } from "./types";
+import type { EmployeeProfile, AttendanceRecord, Division, OfficeOrder } from "./types";
 
 const divisions: Division[] = [
   { division_id: 1, division_name: "Office of the Regional Director", division_code: "ORD" },
@@ -233,6 +233,76 @@ export function generateAttendance(): AttendanceRecord[] {
   }
 
   return records;
+}
+
+export function generateOfficeOrders(): OfficeOrder[] {
+  seed = 123;
+  const orders: OfficeOrder[] = [];
+
+  const purposes = [
+    "Attend regional planning workshop",
+    "Participate in training seminar",
+    "Official business meeting",
+    "Conduct field inspection",
+    "Attend coordination meeting",
+    "Represent office in conference",
+    "Technical assistance visit",
+    "Monitoring and evaluation activity",
+    "Policy consultation forum",
+    "Stakeholder consultation",
+  ];
+
+  const destinations = [
+    "Davao City",
+    "Tagum City",
+    "Digos City",
+    "Mati City",
+    "Panabo City",
+    "Zamboanga City",
+    "Cagayan de Oro City",
+    "Butuan City",
+    "General Santos City",
+    "Kidapawan City",
+    "Dipolog City",
+    "Pagadian City",
+    "Iligan City",
+    "Cotabato City",
+    "Manila",
+    "Quezon City",
+    "Makati City",
+  ];
+
+  const travelTypes: ("local" | "regional" | "national")[] = ["local", "regional", "national"];
+
+  // Generate 2 office orders per employee
+  for (let empId = 1; empId <= 82; empId++) {
+    const employeeNo = `EMP-${pad(empId, 4)}`;
+
+    for (let orderNum = 1; orderNum <= 2; orderNum++) {
+      const travelType = seededFrom(travelTypes);
+      const startDate = randomDate(new Date("2025-01-01"), new Date("2025-12-31"));
+      const endDate = new Date(startDate);
+      endDate.setDate(endDate.getDate() + seededInt(1, 5)); // 1-5 days duration
+
+      const approvedDate = new Date(startDate);
+      approvedDate.setDate(approvedDate.getDate() - seededInt(7, 14)); // Approved 7-14 days before travel
+
+      orders.push({
+        office_order_no: `OO-2025-${pad(empId, 3)}-${orderNum}`,
+        employee_no: employeeNo,
+        purpose: seededFrom(purposes),
+        destination: seededFrom(destinations),
+        travel_type: travelType,
+        travel_date_start: startDate,
+        travel_date_end: endDate.toISOString().split("T")[0],
+        status: "approved",
+        approved_at: approvedDate.toISOString(),
+        remarks: seededInt(0, 10) > 7 ? seededFrom(["Urgent", "Regular", "With funding"]) : null,
+      });
+    }
+  }
+
+  return orders;
 }
 
 export { divisions };

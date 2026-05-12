@@ -155,8 +155,13 @@ export function generateEmployees(): EmployeeProfile[] {
     const stepIncrement = Math.round(baseSalary * 0.0125 * (step - 1));
     const salary = baseSalary + stepIncrement;
 
-    const appointmentDate = randomDate(new Date("2000-01-01"), new Date("2018-12-31"));
-    const promotionDate = randomDate(new Date("2019-01-01"), new Date("2023-12-31"));
+    // Mix of long-term and recent employees (including some under 6 months)
+    const appointmentDate = randomDate(new Date("2000-01-01"), new Date("2026-04-30"));
+    // Promotion date should be after appointment date
+    const promotionDate = randomDate(
+      new Date(Math.max(new Date("2019-01-01").getTime(), new Date(appointmentDate).getTime() + 365 * 24 * 60 * 60 * 1000)),
+      new Date("2025-12-31")
+    );
 
     const empStatus = i <= 60 ? "Permanent" : seededFrom(["Casual", "Contractual", "Job Order"]);
 

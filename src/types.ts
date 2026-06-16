@@ -5,16 +5,16 @@ export interface Division {
 }
 
 export interface EmployeeProfile {
-  employee_id: string;
-  employee_no: string;
+  employee_id: number;
+  employee_no: string | null;
   last_name: string;
   first_name: string;
   middle_name: string | null;
   position_title: string;
-  plantilla_item_no: string;
-  salary_grade: number;
-  step: number;
-  basic_monthly_salary: number;
+  plantilla_item_no: string | null;
+  salary_grade: number | null;
+  step: number | null;
+  basic_monthly_salary: string;
   division_id: number;
   division_name: string;
   division_code: string;
@@ -27,6 +27,14 @@ export interface EmployeeProfile {
   pagibig_mid_no: string | null;
   philhealth_no: string | null;
   tin: string | null;
+}
+
+export interface EmployeeResponse {
+  success: boolean;
+  data: {
+    current_page: number;
+    data: EmployeeProfile[];
+  };
 }
 
 export interface AttendanceLog {

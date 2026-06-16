@@ -31,7 +31,13 @@ const server = Bun.serve({
     }
 
     if (path === "/employees") {
-      return json({ total: profiles.length, data: profiles });
+      return json({
+        success: true,
+        data: {
+          current_page: 1,
+          data: profiles,
+        },
+      });
     }
 
     if (path === "/attendance") {

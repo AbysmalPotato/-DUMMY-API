@@ -29,14 +29,34 @@ export interface EmployeeProfile {
   tin: string | null;
 }
 
+export interface AttendanceLog {
+  in: string | null;
+  out: string | null;
+}
+
+export interface AttendanceLogs {
+  am: AttendanceLog;
+  pm: AttendanceLog;
+  ot: AttendanceLog;
+}
+
 export interface AttendanceRecord {
-  employee_id: string;
-  cutoff_start: string;
-  cutoff_end: string;
-  days_present: number;
-  lwop_days: number;
-  late_minutes: number;
-  undertime_minutes: number;
+  user_id: number;
+  user_name: string;
+  date: string;
+  logs: AttendanceLogs;
+  status: string;
+  remarks: string | null;
+}
+
+export interface AttendanceResponse {
+  status: string;
+  meta: {
+    count: number;
+    start_date: string;
+    end_date: string;
+  };
+  data: AttendanceRecord[];
 }
 
 export interface OfficeOrder {

@@ -3,7 +3,7 @@ import { generateEmployees, generateAttendance, divisions, generateOfficeOrders 
 const PORT = process.env.PORT ? parseInt(process.env.PORT) : 3000;
 
 const profiles = generateEmployees();
-const attendance = generateAttendance();
+const attendance = generateAttendance(profiles);
 const officeOrders = generateOfficeOrders();
 
 function json(data: unknown, status = 200) {
@@ -36,23 +36,31 @@ const server = Bun.serve({
 
     if (path === "/attendance") {
       const url = new URL(req.url);
-      const employeeId = url.searchParams.get("employee_id");
-      const cutoffStart = url.searchParams.get("cutoff_start");
-      const cutoffEnd = url.searchParams.get("cutoff_end");
+      const userId = url.searchParams.get("user_id");
+      const startDate = url.searchParams.get("start_date");
+      const endDate = url.searchParams.get("end_date");
 
-      let filtered = attendance;
+      let filteredData = attendance.data;
 
-      if (employeeId) {
-        filtered = filtered.filter((r) => r.employee_id === employeeId);
+      if (userId) {
+        filteredData = filteredData.filter((r) => r.user_id === parseInt(userId));
       }
-      if (cutoffStart) {
-        filtered = filtered.filter((r) => r.cutoff_start >= cutoffStart);
+      if (startDate) {
+        filteredData = filteredData.filter((r) => r.date >= startDate);
       }
-      if (cutoffEnd) {
-        filtered = filtered.filter((r) => r.cutoff_end <= cutoffEnd);
+      if (endDate) {
+        filteredData = filteredData.filter((r) => r.date <= endDate);
       }
 
-      return json(filtered);
+      return json({
+        status: "success",
+        meta: {
+          count: filteredData.length,
+          start_date: attendance.meta.start_date,
+          end_date: attendance.meta.end_date,
+        },
+        data: filteredData,
+      });
     }
 
     if (path === "/divisions") {
@@ -68,4 +76,4 @@ const server = Bun.serve({
 });
 
 console.log(`✅ Employee API running on http://localhost:${PORT}`);
-console.log(`   /employees → ${profiles.length} records | /attendance → ${attendance.length} records | /divisions → ${divisions.length} records | /office-orders → ${officeOrders.length} records`);
+console.log(`   /employees → ${profiles.length} records | /attendance → ${attendance.meta.count} records | /divisions → ${divisions.length} records | /office-orders → ${officeOrders.length} records`);

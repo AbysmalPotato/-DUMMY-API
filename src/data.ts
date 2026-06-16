@@ -1,4 +1,4 @@
-import type { EmployeeProfile, AttendanceRecord, Division, OfficeOrder } from "./types";
+import type { EmployeeProfile, AttendanceRecord, AttendanceResponse, Division, OfficeOrder } from "./types";
 
 const divisions: Division[] = [
   { division_id: 1, division_name: "Office of the Regional Director", division_code: "ORD" },
@@ -194,12 +194,11 @@ export function generateEmployees(): EmployeeProfile[] {
   return profiles;
 }
 
-export function generateAttendance(): AttendanceRecord[] {
+export function generateAttendance(employees: EmployeeProfile[]): AttendanceResponse {
   seed = 99;
   const records: AttendanceRecord[] = [];
 
   // Dynamically generate 12 months back and 3 months forward from today.
-  // Re-deploying is never needed just to update the date range.
   const now = new Date();
   const months: { year: number; month: number }[] = [];
 
@@ -208,36 +207,72 @@ export function generateAttendance(): AttendanceRecord[] {
     months.push({ year: d.getFullYear(), month: d.getMonth() + 1 });
   }
 
-  for (let empId = 1; empId <= 82; empId++) {
+  const startDate = `${months[0].year}-${String(months[0].month).padStart(2, "0")}-01`;
+  const endDate = `${months[months.length - 1].year}-${String(months[months.length - 1].month).padStart(2, "0")}-${new Date(months[months.length - 1].year, months[months.length - 1].month, 0).getDate()}`;
+
+  for (const emp of employees) {
+    const userId = parseInt(emp.employee_id.replace("EMP", ""));
+    const userName = `${emp.first_name} ${emp.last_name}`.toUpperCase();
+
     for (const { year, month } of months) {
-      const mm      = String(month).padStart(2, "0");
-      const lastDay = new Date(year, month, 0).getDate(); // last day of month
+      const mm = String(month).padStart(2, "0");
+      const lastDay = new Date(year, month, 0).getDate();
 
-      // First cutoff: 1–15
-      records.push({
-        employee_id:       `EMP${pad(empId, 3)}`,
-        cutoff_start:      `${year}-${mm}-01`,
-        cutoff_end:        `${year}-${mm}-15`,
-        days_present:      seededInt(8, 11),
-        lwop_days:         seededInt(0, 10) > 8 ? seededInt(1, 2) : 0,
-        late_minutes:      seededInt(0, 3) > 0 ? seededInt(5, 90) : 0,
-        undertime_minutes: seededInt(0, 4) > 0 ? seededInt(0, 60) : 0,
-      });
+      for (let day = 1; day <= lastDay; day++) {
+        const date = `${year}-${mm}-${pad(day, 2)}`;
+        
+        // Skip weekends (Saturday=6, Sunday=0)
+        const dayOfWeek = new Date(year, month - 1, day).getDay();
+        if (dayOfWeek === 0 || dayOfWeek === 6) continue;
 
-      // Second cutoff: 16–end of month
-      records.push({
-        employee_id:       `EMP${pad(empId, 3)}`,
-        cutoff_start:      `${year}-${mm}-16`,
-        cutoff_end:        `${year}-${mm}-${lastDay}`,
-        days_present:      seededInt(8, 11),
-        lwop_days:         seededInt(0, 10) > 8 ? seededInt(1, 2) : 0,
-        late_minutes:      seededInt(0, 3) > 0 ? seededInt(5, 90) : 0,
-        undertime_minutes: seededInt(0, 4) > 0 ? seededInt(0, 60) : 0,
-      });
+        // Generate random log times
+        const hasAmIn = seededInt(0, 10) > 1;
+        const hasAmOut = hasAmIn && seededInt(0, 10) > 2;
+        const hasPmIn = hasAmOut && seededInt(0, 10) > 1;
+        const hasPmOut = hasPmIn && seededInt(0, 10) > 2;
+        const hasOtIn = hasPmOut && seededInt(0, 10) > 8;
+        const hasOtOut = hasOtIn && seededInt(0, 10) > 3;
+
+        const amIn = hasAmIn ? `${year}-${mm}-${pad(day, 2)} 08:${pad(seededInt(0, 30), 2)}:00` : null;
+        const amOut = hasAmOut ? `${year}-${mm}-${pad(day, 2)} 12:${pad(seededInt(0, 30), 2)}:00` : null;
+        const pmIn = hasPmIn ? `${year}-${mm}-${pad(day, 2)} 13:${pad(seededInt(0, 30), 2)}:00` : null;
+        const pmOut = hasPmOut ? `${year}-${mm}-${pad(day, 2)} 17:${pad(seededInt(0, 30), 2)}:00` : null;
+        const otIn = hasOtIn ? `${year}-${mm}-${pad(day, 2)} 18:${pad(seededInt(0, 30), 2)}:00` : null;
+        const otOut = hasOtOut ? `${year}-${mm}-${pad(day, 2)} 20:${pad(seededInt(0, 30), 2)}:00` : null;
+
+        // Determine status based on logs
+        let status = "pending";
+        if (amIn && amOut && pmIn && pmOut) {
+          status = seededInt(0, 10) > 7 ? "approved" : "pending";
+        } else if (!amIn && !amOut && !pmIn && !pmOut) {
+          status = seededInt(0, 10) > 8 ? "absent" : "leave";
+        }
+
+        records.push({
+          user_id: userId,
+          user_name: userName,
+          date,
+          logs: {
+            am: { in: amIn, out: amOut },
+            pm: { in: pmIn, out: pmOut },
+            ot: { in: otIn, out: otOut },
+          },
+          status,
+          remarks: seededInt(0, 10) > 9 ? seededFrom(["Late arrival", "Early departure", "Overtime approved"]) : null,
+        });
+      }
     }
   }
 
-  return records;
+  return {
+    status: "success",
+    meta: {
+      count: records.length,
+      start_date: startDate,
+      end_date: endDate,
+    },
+    data: records,
+  };
 }
 
 export function generateOfficeOrders(): OfficeOrder[] {

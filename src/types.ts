@@ -6,14 +6,14 @@ export interface Division {
 
 export interface EmployeeProfile {
   employee_id: number;
-  employee_no: string | null;
+  employee_no: string;
   last_name: string;
   first_name: string;
   middle_name: string | null;
   position_title: string;
-  plantilla_item_no: string | null;
-  salary_grade: number | null;
-  step: number | null;
+  plantilla_item_no: string;
+  salary_grade: number;
+  step: number;
   basic_monthly_salary: string;
   division_id: number;
   division_name: string;
@@ -22,11 +22,11 @@ export interface EmployeeProfile {
   official_station: string | null;
   date_original_appointment: string | null;
   last_promotion_date: string | null;
-  gsis_bp_no: string | null;
-  gsis_crn: string | null;
-  pagibig_mid_no: string | null;
-  philhealth_no: string | null;
-  tin: string | null;
+  gsis_bp_no: string;
+  gsis_crn: string;
+  pagibig_mid_no: string;
+  philhealth_no: string;
+  tin: string;
 }
 
 export interface EmployeeResponse {

@@ -169,14 +169,14 @@ export function generateEmployees(): EmployeeProfile[] {
 
     profiles.push({
       employee_id: i,
-      employee_no: null,
+      employee_no: `EMP-${pad(i, 4)}`,
       last_name: seededFrom(lastNames),
       first_name: seededFrom(firstNames),
       middle_name: seededFrom(middleNames),
       position_title: position.title,
-      plantilla_item_no: null,
-      salary_grade: null,
-      step: null,
+      plantilla_item_no: `PLTL-${pad(seededInt(1, 200), 4)}`,
+      salary_grade: sg,
+      step,
       basic_monthly_salary: salary.toFixed(2),
       division_id: division.division_id,
       division_name: division.division_name,
@@ -184,12 +184,12 @@ export function generateEmployees(): EmployeeProfile[] {
       employment_status: empStatus,
       official_station: seededFrom(stations),
       date_original_appointment: appointmentDate,
-      last_promotion_date: null,
-      gsis_bp_no: null,
-      gsis_crn: null,
-      pagibig_mid_no: null,
-      philhealth_no: null,
-      tin: null,
+      last_promotion_date: promotionDate,
+      gsis_bp_no: generateGsisBpNo(i),
+      gsis_crn: generateGsisCrn(i),
+      pagibig_mid_no: generatePagibigMid(),
+      philhealth_no: generatePhilhealth(),
+      tin: generateTin(),
     });
   }
 
